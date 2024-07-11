@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/SuttonNightWatchOffice_38.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[51.27148239131156,-0.3521065239163072],[51.56122894719757,0.1675263371143752]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleMaps_0');
+        map.getPane('pane_GoogleMaps_0').style.zIndex = 400;
+        var layer_GoogleMaps_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleMaps_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_GoogleMaps_0;
+        map.createPane('pane_DarkMatter_1');
+        map.getPane('pane_DarkMatter_1').style.zIndex = 401;
+        var layer_DarkMatter_1 = L.tileLayer('http://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+            pane: 'pane_DarkMatter_1',
+            opacity: 1.0,
+            attribution: '<a href="https://cartodb.com/basemaps/">Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_DarkMatter_1;
+        map.addLayer(layer_DarkMatter_1);
+        map.createPane('pane_P9_heatmap_night_2');
+        map.getPane('pane_P9_heatmap_night_2').style.zIndex = 402;
+        var img_P9_heatmap_night_2 = 'data/P9_heatmap_night_2.png';
+        var img_bounds_P9_heatmap_night_2 = [[51.3695302952577,-0.37728935769428035],[51.51568912322577,-0.012359184777545568]];
+        var layer_P9_heatmap_night_2 = new L.imageOverlay(img_P9_heatmap_night_2,
+                                              img_bounds_P9_heatmap_night_2,
+                                              {pane: 'pane_P9_heatmap_night_2'});
+        bounds_group.addLayer(layer_P9_heatmap_night_2);
+        map.createPane('pane_P9_heatmap_evening_3');
+        map.getPane('pane_P9_heatmap_evening_3').style.zIndex = 403;
+        var img_P9_heatmap_evening_3 = 'data/P9_heatmap_evening_3.png';
+        var img_bounds_P9_heatmap_evening_3 = [[51.34523315532222,-0.3711177644839802],[51.53111286994406,0.02052581947043204]];
+        var layer_P9_heatmap_evening_3 = new L.imageOverlay(img_P9_heatmap_evening_3,
+                                              img_bounds_P9_heatmap_evening_3,
+                                              {pane: 'pane_P9_heatmap_evening_3'});
+        bounds_group.addLayer(layer_P9_heatmap_evening_3);
+        map.createPane('pane_P9_heatmap_afternoon_4');
+        map.getPane('pane_P9_heatmap_afternoon_4').style.zIndex = 404;
+        var img_P9_heatmap_afternoon_4 = 'data/P9_heatmap_afternoon_4.png';
+        var img_bounds_P9_heatmap_afternoon_4 = [[51.344248437228835,-0.3730436731877098],[51.55766612560653,0.09441543046955639]];
+        var layer_P9_heatmap_afternoon_4 = new L.imageOverlay(img_P9_heatmap_afternoon_4,
+                                              img_bounds_P9_heatmap_afternoon_4,
+                                              {pane: 'pane_P9_heatmap_afternoon_4'});
+        bounds_group.addLayer(layer_P9_heatmap_afternoon_4);
+        map.createPane('pane_P9_heatmap_morning_5');
+        map.getPane('pane_P9_heatmap_morning_5').style.zIndex = 405;
+        var img_P9_heatmap_morning_5 = 'data/P9_heatmap_morning_5.png';
+        var img_bounds_P9_heatmap_morning_5 = [[51.35184866105343,-0.37147987685991607],[51.5145295592825,-0.026571980715056485]];
+        var layer_P9_heatmap_morning_5 = new L.imageOverlay(img_P9_heatmap_morning_5,
+                                              img_bounds_P9_heatmap_morning_5,
+                                              {pane: 'pane_P9_heatmap_morning_5'});
+        bounds_group.addLayer(layer_P9_heatmap_morning_5);
+        map.createPane('pane_P8_heatmap_morning_6');
+        map.getPane('pane_P8_heatmap_morning_6').style.zIndex = 406;
+        var img_P8_heatmap_morning_6 = 'data/P8_heatmap_morning_6.png';
+        var img_bounds_P8_heatmap_morning_6 = [[51.3389739435898,-0.19670897037956556],[51.412693274318016,-0.08864375900913855]];
+        var layer_P8_heatmap_morning_6 = new L.imageOverlay(img_P8_heatmap_morning_6,
+                                              img_bounds_P8_heatmap_morning_6,
+                                              {pane: 'pane_P8_heatmap_morning_6'});
+        bounds_group.addLayer(layer_P8_heatmap_morning_6);
+        map.createPane('pane_P8_heatmap_afternoon_7');
+        map.getPane('pane_P8_heatmap_afternoon_7').style.zIndex = 407;
+        var img_P8_heatmap_afternoon_7 = 'data/P8_heatmap_afternoon_7.png';
+        var img_bounds_P8_heatmap_afternoon_7 = [[51.33837610420006,-0.19734977581931182],[51.41100444089445,-0.08868621402053756]];
+        var layer_P8_heatmap_afternoon_7 = new L.imageOverlay(img_P8_heatmap_afternoon_7,
+                                              img_bounds_P8_heatmap_afternoon_7,
+                                              {pane: 'pane_P8_heatmap_afternoon_7'});
+        bounds_group.addLayer(layer_P8_heatmap_afternoon_7);
+        map.createPane('pane_P8_heatmap_night_8');
+        map.getPane('pane_P8_heatmap_night_8').style.zIndex = 408;
+        var img_P8_heatmap_night_8 = 'data/P8_heatmap_night_8.png';
+        var img_bounds_P8_heatmap_night_8 = [[51.338940414741906,-0.1675723917419657],[51.401941269096966,-0.09304784474764823]];
+        var layer_P8_heatmap_night_8 = new L.imageOverlay(img_P8_heatmap_night_8,
+                                              img_bounds_P8_heatmap_night_8,
+                                              {pane: 'pane_P8_heatmap_night_8'});
+        bounds_group.addLayer(layer_P8_heatmap_night_8);
+        map.createPane('pane_P8_heatmap_evening_9');
+        map.getPane('pane_P8_heatmap_evening_9').style.zIndex = 409;
+        var img_P8_heatmap_evening_9 = 'data/P8_heatmap_evening_9.png';
+        var img_bounds_P8_heatmap_evening_9 = [[51.33815529569398,-0.16754024805642326],[51.41054459996312,-0.0886771465469638]];
+        var layer_P8_heatmap_evening_9 = new L.imageOverlay(img_P8_heatmap_evening_9,
+                                              img_bounds_P8_heatmap_evening_9,
+                                              {pane: 'pane_P8_heatmap_evening_9'});
+        bounds_group.addLayer(layer_P8_heatmap_evening_9);
+        map.createPane('pane_P7_heatmap_morning_10');
+        map.getPane('pane_P7_heatmap_morning_10').style.zIndex = 410;
+        var img_P7_heatmap_morning_10 = 'data/P7_heatmap_morning_10.png';
+        var img_bounds_P7_heatmap_morning_10 = [[51.28204236816584,-0.1962807946605282],[51.395537677663505,-0.06020823306104408]];
+        var layer_P7_heatmap_morning_10 = new L.imageOverlay(img_P7_heatmap_morning_10,
+                                              img_bounds_P7_heatmap_morning_10,
+                                              {pane: 'pane_P7_heatmap_morning_10'});
+        bounds_group.addLayer(layer_P7_heatmap_morning_10);
+        map.createPane('pane_P7_heatmap_afternoon_11');
+        map.getPane('pane_P7_heatmap_afternoon_11').style.zIndex = 411;
+        var img_P7_heatmap_afternoon_11 = 'data/P7_heatmap_afternoon_11.png';
+        var img_bounds_P7_heatmap_afternoon_11 = [[51.3363459811157,-0.19631549433200074],[51.4977074778345,-0.08221772409996524]];
+        var layer_P7_heatmap_afternoon_11 = new L.imageOverlay(img_P7_heatmap_afternoon_11,
+                                              img_bounds_P7_heatmap_afternoon_11,
+                                              {pane: 'pane_P7_heatmap_afternoon_11'});
+        bounds_group.addLayer(layer_P7_heatmap_afternoon_11);
+        map.createPane('pane_P7_heatmap_evening_12');
+        map.getPane('pane_P7_heatmap_evening_12').style.zIndex = 412;
+        var img_P7_heatmap_evening_12 = 'data/P7_heatmap_evening_12.png';
+        var img_bounds_P7_heatmap_evening_12 = [[51.33644785326802,-0.15534950675972675],[51.390720200422905,-0.09470774711377786]];
+        var layer_P7_heatmap_evening_12 = new L.imageOverlay(img_P7_heatmap_evening_12,
+                                              img_bounds_P7_heatmap_evening_12,
+                                              {pane: 'pane_P7_heatmap_evening_12'});
+        bounds_group.addLayer(layer_P7_heatmap_evening_12);
+        map.createPane('pane_P7_heatmap_night_13');
+        map.getPane('pane_P7_heatmap_night_13').style.zIndex = 413;
+        var img_P7_heatmap_night_13 = 'data/P7_heatmap_night_13.png';
+        var img_bounds_P7_heatmap_night_13 = [[51.359163650813976,-0.15348480326126626],[51.39040598533118,-0.09803830215451376]];
+        var layer_P7_heatmap_night_13 = new L.imageOverlay(img_P7_heatmap_night_13,
+                                              img_bounds_P7_heatmap_night_13,
+                                              {pane: 'pane_P7_heatmap_night_13'});
+        bounds_group.addLayer(layer_P7_heatmap_night_13);
+        map.createPane('pane_P6_heatmap_morning_14');
+        map.getPane('pane_P6_heatmap_morning_14').style.zIndex = 414;
+        var img_P6_heatmap_morning_14 = 'data/P6_heatmap_morning_14.png';
+        var img_bounds_P6_heatmap_morning_14 = [[51.35200327460979,-0.24754222276855173],[51.464986260679886,-0.12322279841737281]];
+        var layer_P6_heatmap_morning_14 = new L.imageOverlay(img_P6_heatmap_morning_14,
+                                              img_bounds_P6_heatmap_morning_14,
+                                              {pane: 'pane_P6_heatmap_morning_14'});
+        bounds_group.addLayer(layer_P6_heatmap_morning_14);
+        map.createPane('pane_P6_heatmap_evening_15');
+        map.getPane('pane_P6_heatmap_evening_15').style.zIndex = 415;
+        var img_P6_heatmap_evening_15 = 'data/P6_heatmap_evening_15.png';
+        var img_bounds_P6_heatmap_evening_15 = [[51.35742716017376,-0.20298222523414497],[51.42738952969416,-0.08950749932041051]];
+        var layer_P6_heatmap_evening_15 = new L.imageOverlay(img_P6_heatmap_evening_15,
+                                              img_bounds_P6_heatmap_evening_15,
+                                              {pane: 'pane_P6_heatmap_evening_15'});
+        bounds_group.addLayer(layer_P6_heatmap_evening_15);
+        map.createPane('pane_P6_heatmap_afternoon_16');
+        map.getPane('pane_P6_heatmap_afternoon_16').style.zIndex = 416;
+        var img_P6_heatmap_afternoon_16 = 'data/P6_heatmap_afternoon_16.png';
+        var img_bounds_P6_heatmap_afternoon_16 = [[51.354179768519224,-0.24768000713649274],[51.465206074656365,-0.08314127739457926]];
+        var layer_P6_heatmap_afternoon_16 = new L.imageOverlay(img_P6_heatmap_afternoon_16,
+                                              img_bounds_P6_heatmap_afternoon_16,
+                                              {pane: 'pane_P6_heatmap_afternoon_16'});
+        bounds_group.addLayer(layer_P6_heatmap_afternoon_16);
+        map.createPane('pane_P6_heatmap_night_17');
+        map.getPane('pane_P6_heatmap_night_17').style.zIndex = 417;
+        var img_P6_heatmap_night_17 = 'data/P6_heatmap_night_17.png';
+        var img_bounds_P6_heatmap_night_17 = [[51.35951101946688,-0.20127475473027565],[51.40579347447718,-0.1306013021409545]];
+        var layer_P6_heatmap_night_17 = new L.imageOverlay(img_P6_heatmap_night_17,
+                                              img_bounds_P6_heatmap_night_17,
+                                              {pane: 'pane_P6_heatmap_night_17'});
+        bounds_group.addLayer(layer_P6_heatmap_night_17);
+        map.createPane('pane_P5_heatmap_night_18');
+        map.getPane('pane_P5_heatmap_night_18').style.zIndex = 418;
+        var img_P5_heatmap_night_18 = 'data/P5_heatmap_night_18.png';
+        var img_bounds_P5_heatmap_night_18 = [[51.20996701593905,-0.28592948321501077],[51.51150806937208,0.1647767949522134]];
+        var layer_P5_heatmap_night_18 = new L.imageOverlay(img_P5_heatmap_night_18,
+                                              img_bounds_P5_heatmap_night_18,
+                                              {pane: 'pane_P5_heatmap_night_18'});
+        bounds_group.addLayer(layer_P5_heatmap_night_18);
+        map.createPane('pane_P5_heatmap_evening_19');
+        map.getPane('pane_P5_heatmap_evening_19').style.zIndex = 419;
+        var img_P5_heatmap_evening_19 = 'data/P5_heatmap_evening_19.png';
+        var img_bounds_P5_heatmap_evening_19 = [[51.25362488058442,-0.2575787804159115],[51.40566628090563,-0.03292508901261537]];
+        var layer_P5_heatmap_evening_19 = new L.imageOverlay(img_P5_heatmap_evening_19,
+                                              img_bounds_P5_heatmap_evening_19,
+                                              {pane: 'pane_P5_heatmap_evening_19'});
+        bounds_group.addLayer(layer_P5_heatmap_evening_19);
+        map.createPane('pane_P5_heatmap_afternoon_20');
+        map.getPane('pane_P5_heatmap_afternoon_20').style.zIndex = 420;
+        var img_P5_heatmap_afternoon_20 = 'data/P5_heatmap_afternoon_20.png';
+        var img_bounds_P5_heatmap_afternoon_20 = [[51.21142845660013,-0.22432204636421216],[51.40319867786897,-0.05766342320324973]];
+        var layer_P5_heatmap_afternoon_20 = new L.imageOverlay(img_P5_heatmap_afternoon_20,
+                                              img_bounds_P5_heatmap_afternoon_20,
+                                              {pane: 'pane_P5_heatmap_afternoon_20'});
+        bounds_group.addLayer(layer_P5_heatmap_afternoon_20);
+        map.createPane('pane_P5_heatmap_morning_21');
+        map.getPane('pane_P5_heatmap_morning_21').style.zIndex = 421;
+        var img_P5_heatmap_morning_21 = 'data/P5_heatmap_morning_21.png';
+        var img_bounds_P5_heatmap_morning_21 = [[51.27253735973995,-0.2574680026168081],[51.39911449664518,-0.023548176396240333]];
+        var layer_P5_heatmap_morning_21 = new L.imageOverlay(img_P5_heatmap_morning_21,
+                                              img_bounds_P5_heatmap_morning_21,
+                                              {pane: 'pane_P5_heatmap_morning_21'});
+        bounds_group.addLayer(layer_P5_heatmap_morning_21);
+        map.createPane('pane_P4_heatmap_afternoon_22');
+        map.getPane('pane_P4_heatmap_afternoon_22').style.zIndex = 422;
+        var img_P4_heatmap_afternoon_22 = 'data/P4_heatmap_afternoon_22.png';
+        var img_bounds_P4_heatmap_afternoon_22 = [[51.35195247900938,-0.20299541389544823],[51.464768762524834,-0.08318077398233126]];
+        var layer_P4_heatmap_afternoon_22 = new L.imageOverlay(img_P4_heatmap_afternoon_22,
+                                              img_bounds_P4_heatmap_afternoon_22,
+                                              {pane: 'pane_P4_heatmap_afternoon_22'});
+        bounds_group.addLayer(layer_P4_heatmap_afternoon_22);
+        map.createPane('pane_P4_heatmap_night_23');
+        map.getPane('pane_P4_heatmap_night_23').style.zIndex = 423;
+        var img_P4_heatmap_night_23 = 'data/P4_heatmap_night_23.png';
+        var img_bounds_P4_heatmap_night_23 = [[51.359618771776,-0.20101845653664518],[51.40578959996191,-0.13031325091477264]];
+        var layer_P4_heatmap_night_23 = new L.imageOverlay(img_P4_heatmap_night_23,
+                                              img_bounds_P4_heatmap_night_23,
+                                              {pane: 'pane_P4_heatmap_night_23'});
+        bounds_group.addLayer(layer_P4_heatmap_night_23);
+        map.createPane('pane_P4_heatmap_evening_24');
+        map.getPane('pane_P4_heatmap_evening_24').style.zIndex = 424;
+        var img_P4_heatmap_evening_24 = 'data/P4_heatmap_evening_24.png';
+        var img_bounds_P4_heatmap_evening_24 = [[51.3573792194249,-0.20466866657526306],[51.41204149512725,-0.08892556924058034]];
+        var layer_P4_heatmap_evening_24 = new L.imageOverlay(img_P4_heatmap_evening_24,
+                                              img_bounds_P4_heatmap_evening_24,
+                                              {pane: 'pane_P4_heatmap_evening_24'});
+        bounds_group.addLayer(layer_P4_heatmap_evening_24);
+        map.createPane('pane_P4_heatmap_morning_25');
+        map.getPane('pane_P4_heatmap_morning_25').style.zIndex = 425;
+        var img_P4_heatmap_morning_25 = 'data/P4_heatmap_morning_25.png';
+        var img_bounds_P4_heatmap_morning_25 = [[51.35198005889487,-0.20157920255436965],[51.46561203734874,-0.12317132770515346]];
+        var layer_P4_heatmap_morning_25 = new L.imageOverlay(img_P4_heatmap_morning_25,
+                                              img_bounds_P4_heatmap_morning_25,
+                                              {pane: 'pane_P4_heatmap_morning_25'});
+        bounds_group.addLayer(layer_P4_heatmap_morning_25);
+        map.createPane('pane_P3_heatmap_morning_26');
+        map.getPane('pane_P3_heatmap_morning_26').style.zIndex = 426;
+        var img_P3_heatmap_morning_26 = 'data/P3_heatmap_morning_26.png';
+        var img_bounds_P3_heatmap_morning_26 = [[51.286587082204974,-0.1726759619067977],[51.37222495536637,-0.06753431861935008]];
+        var layer_P3_heatmap_morning_26 = new L.imageOverlay(img_P3_heatmap_morning_26,
+                                              img_bounds_P3_heatmap_morning_26,
+                                              {pane: 'pane_P3_heatmap_morning_26'});
+        bounds_group.addLayer(layer_P3_heatmap_morning_26);
+        map.createPane('pane_P3_heatmap_afternoon_27');
+        map.getPane('pane_P3_heatmap_afternoon_27').style.zIndex = 427;
+        var img_P3_heatmap_afternoon_27 = 'data/P3_heatmap_afternoon_27.png';
+        var img_bounds_P3_heatmap_afternoon_27 = [[51.283241144946174,-0.2143804988359802],[51.40365309743962,-0.06204706859026272]];
+        var layer_P3_heatmap_afternoon_27 = new L.imageOverlay(img_P3_heatmap_afternoon_27,
+                                              img_bounds_P3_heatmap_afternoon_27,
+                                              {pane: 'pane_P3_heatmap_afternoon_27'});
+        bounds_group.addLayer(layer_P3_heatmap_afternoon_27);
+        map.createPane('pane_P3_heatmap_evening_28');
+        map.getPane('pane_P3_heatmap_evening_28').style.zIndex = 428;
+        var img_P3_heatmap_evening_28 = 'data/P3_heatmap_evening_28.png';
+        var img_bounds_P3_heatmap_evening_28 = [[51.28039028058408,-0.16860951550187778],[51.3713683506334,-0.06798459924312002]];
+        var layer_P3_heatmap_evening_28 = new L.imageOverlay(img_P3_heatmap_evening_28,
+                                              img_bounds_P3_heatmap_evening_28,
+                                              {pane: 'pane_P3_heatmap_evening_28'});
+        bounds_group.addLayer(layer_P3_heatmap_evening_28);
+        map.createPane('pane_P3_heatmap_night_29');
+        map.getPane('pane_P3_heatmap_night_29').style.zIndex = 429;
+        var img_P3_heatmap_night_29 = 'data/P3_heatmap_night_29.png';
+        var img_bounds_P3_heatmap_night_29 = [[51.36371486338354,-0.15286380294723018],[51.37116261907812,-0.1179833815355608]];
+        var layer_P3_heatmap_night_29 = new L.imageOverlay(img_P3_heatmap_night_29,
+                                              img_bounds_P3_heatmap_night_29,
+                                              {pane: 'pane_P3_heatmap_night_29'});
+        bounds_group.addLayer(layer_P3_heatmap_night_29);
+        map.createPane('pane_P2_heatmap_night_30');
+        map.getPane('pane_P2_heatmap_night_30').style.zIndex = 430;
+        var img_P2_heatmap_night_30 = 'data/P2_heatmap_night_30.png';
+        var img_bounds_P2_heatmap_night_30 = [[51.348057110348776,-0.19480121060275016],[51.388627891573556,-0.15182664793242506]];
+        var layer_P2_heatmap_night_30 = new L.imageOverlay(img_P2_heatmap_night_30,
+                                              img_bounds_P2_heatmap_night_30,
+                                              {pane: 'pane_P2_heatmap_night_30'});
+        bounds_group.addLayer(layer_P2_heatmap_night_30);
+        map.createPane('pane_P2_heatmap_evening_31');
+        map.getPane('pane_P2_heatmap_evening_31').style.zIndex = 431;
+        var img_P2_heatmap_evening_31 = 'data/P2_heatmap_evening_31.png';
+        var img_bounds_P2_heatmap_evening_31 = [[51.34858135738451,-0.1971603192244436],[51.38359352936774,-0.15207856765974537]];
+        var layer_P2_heatmap_evening_31 = new L.imageOverlay(img_P2_heatmap_evening_31,
+                                              img_bounds_P2_heatmap_evening_31,
+                                              {pane: 'pane_P2_heatmap_evening_31'});
+        bounds_group.addLayer(layer_P2_heatmap_evening_31);
+        map.createPane('pane_P2_heatmap_afternoon_32');
+        map.getPane('pane_P2_heatmap_afternoon_32').style.zIndex = 432;
+        var img_P2_heatmap_afternoon_32 = 'data/P2_heatmap_afternoon_32.png';
+        var img_bounds_P2_heatmap_afternoon_32 = [[51.34603806718991,-0.3388962941873315],[51.469237584445395,-0.08351325201144065]];
+        var layer_P2_heatmap_afternoon_32 = new L.imageOverlay(img_P2_heatmap_afternoon_32,
+                                              img_bounds_P2_heatmap_afternoon_32,
+                                              {pane: 'pane_P2_heatmap_afternoon_32'});
+        bounds_group.addLayer(layer_P2_heatmap_afternoon_32);
+        map.createPane('pane_P2_heatmap_morning_33');
+        map.getPane('pane_P2_heatmap_morning_33').style.zIndex = 433;
+        var img_P2_heatmap_morning_33 = 'data/P2_heatmap_morning_33.png';
+        var img_bounds_P2_heatmap_morning_33 = [[51.348904519792,-0.3053152200207708],[51.468722575922556,-0.0836252054232545]];
+        var layer_P2_heatmap_morning_33 = new L.imageOverlay(img_P2_heatmap_morning_33,
+                                              img_bounds_P2_heatmap_morning_33,
+                                              {pane: 'pane_P2_heatmap_morning_33'});
+        bounds_group.addLayer(layer_P2_heatmap_morning_33);
+        map.createPane('pane_P1_heatmap_night_34');
+        map.getPane('pane_P1_heatmap_night_34').style.zIndex = 434;
+        var img_P1_heatmap_night_34 = 'data/P1_heatmap_night_34.png';
+        var img_bounds_P1_heatmap_night_34 = [[51.3569989500285,-0.20180788578512215],[51.4087020546689,-0.12912275872993792]];
+        var layer_P1_heatmap_night_34 = new L.imageOverlay(img_P1_heatmap_night_34,
+                                              img_bounds_P1_heatmap_night_34,
+                                              {pane: 'pane_P1_heatmap_night_34'});
+        bounds_group.addLayer(layer_P1_heatmap_night_34);
+        map.addLayer(layer_P1_heatmap_night_34);
+        map.createPane('pane_P1_heatmap_evening_35');
+        map.getPane('pane_P1_heatmap_evening_35').style.zIndex = 435;
+        var img_P1_heatmap_evening_35 = 'data/P1_heatmap_evening_35.png';
+        var img_bounds_P1_heatmap_evening_35 = [[51.357138280145044,-0.20315495000964695],[51.426512306931755,-0.1247937728569733]];
+        var layer_P1_heatmap_evening_35 = new L.imageOverlay(img_P1_heatmap_evening_35,
+                                              img_bounds_P1_heatmap_evening_35,
+                                              {pane: 'pane_P1_heatmap_evening_35'});
+        bounds_group.addLayer(layer_P1_heatmap_evening_35);
+        map.addLayer(layer_P1_heatmap_evening_35);
+        map.createPane('pane_P1_heatmap_afternoon_36');
+        map.getPane('pane_P1_heatmap_afternoon_36').style.zIndex = 436;
+        var img_P1_heatmap_afternoon_36 = 'data/P1_heatmap_afternoon_36.png';
+        var img_bounds_P1_heatmap_afternoon_36 = [[51.35195549896718,-0.2478224930187395],[51.46572329864097,-0.08314145031221563]];
+        var layer_P1_heatmap_afternoon_36 = new L.imageOverlay(img_P1_heatmap_afternoon_36,
+                                              img_bounds_P1_heatmap_afternoon_36,
+                                              {pane: 'pane_P1_heatmap_afternoon_36'});
+        bounds_group.addLayer(layer_P1_heatmap_afternoon_36);
+        map.addLayer(layer_P1_heatmap_afternoon_36);
+        map.createPane('pane_P1_heatmap_morning_37');
+        map.getPane('pane_P1_heatmap_morning_37').style.zIndex = 437;
+        var img_P1_heatmap_morning_37 = 'data/P1_heatmap_morning_37.png';
+        var img_bounds_P1_heatmap_morning_37 = [[51.35197463395927,-0.2476453994857258],[51.46581419942164,-0.12311143897122899]];
+        var layer_P1_heatmap_morning_37 = new L.imageOverlay(img_P1_heatmap_morning_37,
+                                              img_bounds_P1_heatmap_morning_37,
+                                              {pane: 'pane_P1_heatmap_morning_37'});
+        bounds_group.addLayer(layer_P1_heatmap_morning_37);
+        map.addLayer(layer_P1_heatmap_morning_37);
+        function pop_SuttonNightWatchOffice_38(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="name"colspan="2"><strong>name</strong><br />' + (feature.properties['name'] !== null ? autolinker.link(feature.properties['name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="descriptio"colspan="2"><strong>descriptio</strong><br />' + (feature.properties['descriptio'] !== null ? autolinker.link(feature.properties['descriptio'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_SuttonNightWatchOffice_38_0() {
+            return {
+                pane: 'pane_SuttonNightWatchOffice_38',
+                radius: 8.0,
+                opacity: 1,
+                color: 'rgba(50,87,128,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(72,123,182,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_SuttonNightWatchOffice_38');
+        map.getPane('pane_SuttonNightWatchOffice_38').style.zIndex = 438;
+        map.getPane('pane_SuttonNightWatchOffice_38').style['mix-blend-mode'] = 'normal';
+        var layer_SuttonNightWatchOffice_38 = new L.geoJson(json_SuttonNightWatchOffice_38, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_SuttonNightWatchOffice_38',
+            layerName: 'layer_SuttonNightWatchOffice_38',
+            pane: 'pane_SuttonNightWatchOffice_38',
+            onEachFeature: pop_SuttonNightWatchOffice_38,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_SuttonNightWatchOffice_38_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_SuttonNightWatchOffice_38);
+        map.addLayer(layer_SuttonNightWatchOffice_38);
+        var baseMaps = {};
+        var overlaysTree = [
+            {label: '<img src="legend/SuttonNightWatchOffice_38.png" /> Sutton Night Watch Office', layer: layer_SuttonNightWatchOffice_38},
+        {label: '<b>P1</b>', selectAllCheckbox: true, children: [
+            {label: "P1_heatmap_morning", layer: layer_P1_heatmap_morning_37},
+            {label: "P1_heatmap_afternoon", layer: layer_P1_heatmap_afternoon_36},
+            {label: "P1_heatmap_evening", layer: layer_P1_heatmap_evening_35},
+            {label: "P1_heatmap_night", layer: layer_P1_heatmap_night_34},]},
+        {label: '<b>P2</b>', selectAllCheckbox: true, children: [
+            {label: "P2_heatmap_morning", layer: layer_P2_heatmap_morning_33},
+            {label: "P2_heatmap_afternoon", layer: layer_P2_heatmap_afternoon_32},
+            {label: "P2_heatmap_evening", layer: layer_P2_heatmap_evening_31},
+            {label: "P2_heatmap_night", layer: layer_P2_heatmap_night_30},]},
+        {label: '<b>P3</b>', selectAllCheckbox: true, children: [
+            {label: "P3_heatmap_night", layer: layer_P3_heatmap_night_29},
+            {label: "P3_heatmap_evening", layer: layer_P3_heatmap_evening_28},
+            {label: "P3_heatmap_afternoon", layer: layer_P3_heatmap_afternoon_27},
+            {label: "P3_heatmap_morning", layer: layer_P3_heatmap_morning_26},]},
+        {label: '<b>P4</b>', selectAllCheckbox: true, children: [
+            {label: "P4_heatmap_morning", layer: layer_P4_heatmap_morning_25},
+            {label: "P4_heatmap_evening", layer: layer_P4_heatmap_evening_24},
+            {label: "P4_heatmap_night", layer: layer_P4_heatmap_night_23},
+            {label: "P4_heatmap_afternoon", layer: layer_P4_heatmap_afternoon_22},]},
+        {label: '<b>P5</b>', selectAllCheckbox: true, children: [
+            {label: "P5_heatmap_morning", layer: layer_P5_heatmap_morning_21},
+            {label: "P5_heatmap_afternoon", layer: layer_P5_heatmap_afternoon_20},
+            {label: "P5_heatmap_evening", layer: layer_P5_heatmap_evening_19},
+            {label: "P5_heatmap_night", layer: layer_P5_heatmap_night_18},]},
+        {label: '<b>P6</b>', selectAllCheckbox: true, children: [
+            {label: "P6_heatmap_night", layer: layer_P6_heatmap_night_17},
+            {label: "P6_heatmap_afternoon", layer: layer_P6_heatmap_afternoon_16},
+            {label: "P6_heatmap_evening", layer: layer_P6_heatmap_evening_15},
+            {label: "P6_heatmap_morning", layer: layer_P6_heatmap_morning_14},]},
+        {label: '<b>P7</b>', selectAllCheckbox: true, children: [
+            {label: "P7_heatmap_night", layer: layer_P7_heatmap_night_13},
+            {label: "P7_heatmap_evening", layer: layer_P7_heatmap_evening_12},
+            {label: "P7_heatmap_afternoon", layer: layer_P7_heatmap_afternoon_11},
+            {label: "P7_heatmap_morning", layer: layer_P7_heatmap_morning_10},]},
+        {label: '<b>P8</b>', selectAllCheckbox: true, children: [
+            {label: "P8_heatmap_evening", layer: layer_P8_heatmap_evening_9},
+            {label: "P8_heatmap_night", layer: layer_P8_heatmap_night_8},
+            {label: "P8_heatmap_afternoon", layer: layer_P8_heatmap_afternoon_7},
+            {label: "P8_heatmap_morning", layer: layer_P8_heatmap_morning_6},]},
+        {label: '<b>P9</b>', selectAllCheckbox: true, children: [
+            {label: "P9_heatmap_morning", layer: layer_P9_heatmap_morning_5},
+            {label: "P9_heatmap_afternoon", layer: layer_P9_heatmap_afternoon_4},
+            {label: "P9_heatmap_evening", layer: layer_P9_heatmap_evening_3},
+            {label: "P9_heatmap_night", layer: layer_P9_heatmap_night_2},]},
+        {label: '<b>Basemap</b>', selectAllCheckbox: true, children: [
+            {label: "Dark Matter", layer: layer_DarkMatter_1},
+            {label: "Google Maps", layer: layer_GoogleMaps_0},]},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: false, 
+        });
+        lay.addTo(map);
+        setBounds();
+        L.ImageOverlay.include({
+            getBounds: function () {
+                return this._bounds;
+            }
+        });
+        </script>
+    </body>
+</html>
